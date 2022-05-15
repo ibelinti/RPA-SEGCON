@@ -1,0 +1,2726 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_uiflow_5": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_shareduiflow_46423"
+        },
+        "api": {
+          "name": "shared_uiflow"
+        }
+      },
+      "shared_onedriveforbusiness": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedonedriveforbusiness_c560a"
+        },
+        "api": {
+          "name": "shared_onedriveforbusiness"
+        }
+      },
+      "shared_commondataserviceforapps": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedcommondataserviceforapps_3887d"
+        },
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        }
+      },
+      "shared_uiflow_3": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_shareduiflow_77c04"
+        },
+        "api": {
+          "name": "shared_uiflow"
+        }
+      },
+      "shared_uiflow_4": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_shareduiflow_810a7"
+        },
+        "api": {
+          "name": "shared_uiflow"
+        }
+      },
+      "shared_onedriveforbusiness_1": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedonedriveforbusiness_c560a"
+        },
+        "api": {
+          "name": "shared_onedriveforbusiness"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "d4df0898-a3e0-491e-9b23-9e714bdfdf76"
+          },
+          "type": "Request",
+          "kind": "Http",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_proceso": {
+                  "type": "string"
+                },
+                "numero_documento": {
+                  "type": "string"
+                },
+                "fecha_nacimiento": {
+                  "type": "string"
+                },
+                "tipo_flujo": {
+                  "type": "string"
+                },
+                "sub_flujo": {
+                  "type": "string"
+                },
+                "pantalla": {
+                  "type": "integer"
+                }
+              }
+            },
+            "method": "POST",
+            "relativePath": "confianza"
+          }
+        }
+      },
+      "actions": {
+        "Var_Repuesta": {
+          "runAfter": {
+            "Tipo_de_Pantalla": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "97b0e338-ce8a-489f-998f-0537263a0409"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Var_Respuesta",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Response": {
+          "runAfter": {
+            "Flujos": [
+              "Succeeded"
+            ]
+          },
+          "trackedProperties": {
+            "PRUEBA": "UNO"
+          },
+          "metadata": {
+            "operationMetadataId": "39356172-9555-4092-8123-2250e7b589c2"
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 200,
+            "body": "@variables('Var_Respuesta')"
+          },
+          "operationOptions": "Asynchronous"
+        },
+        "Flujos": {
+          "runAfter": {
+            "Var_Posicion_Caracteres": [
+              "Succeeded"
+            ]
+          },
+          "cases": {
+            "Consejo_de_la_Judicatura": {
+              "case": "Consejo de la Judicatura",
+              "actions": {
+                "Set_variable_URL_Judicatura": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Url",
+                    "value": "http://consultas.funcionjudicial.gob.ec/informacionjudicial/public/informacion.jsf"
+                  }
+                },
+                "Consejo_de_la_Judicatura": {
+                  "runAfter": {
+                    "Set_variable_URL_Judicatura": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_uiflow_5",
+                      "operationId": "RunUIFlow_V2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                    },
+                    "parameters": {
+                      "uiFlowId": "ce7fb33a-2132-4530-b827-e9f8c63cffc0",
+                      "runMode": "attended",
+                      "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                      "item/var_Url": "@variables('var_Url')",
+                      "item/var_Nombre_Proceso": "@triggerBody()?['tipo_flujo']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Get_file_content_Judicatura": {
+                  "runAfter": {
+                    "Consejo_de_la_Judicatura": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_onedriveforbusiness",
+                      "operationId": "GetFileContentByPath",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                    },
+                    "parameters": {
+                      "path": "/Documentos Fianzas/@{trim(outputs('Consejo_de_la_Judicatura')?['body/var_Nombre_Documento'])}.pdf",
+                      "inferContentType": true
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Set_Base_64_Judicatura": {
+                  "runAfter": {
+                    "Guardar_Texto_Consejo_de_la_Judicatura": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Base64",
+                    "value": "@{base64(outputs('Get_file_content_Judicatura')?['body'])}"
+                  }
+                },
+                "Recognize_text_PDF_Judicatura": {
+                  "runAfter": {
+                    "Get_file_content_Judicatura": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "flowSystemMetadata": {
+                      "portalOperationId": "aibuilderpredict_textrecognition",
+                      "portalOperationGroup": "aibuilder",
+                      "portalOperationApiDisplayNameOverride": "AI Builder",
+                      "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                      "portalOperationBrandColorOverride": "#742775",
+                      "portalOperationApiTierOverride": "Standard"
+                    }
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "aibuilderpredict_textrecognition",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "item/requestv2/base64Encoded": "@outputs('Get_file_content_Judicatura')?['body']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Validar_Consejo_de_la_Judicatura": {
+                  "actions": {
+                    "Set_variable_Respuesta_si_resultados": {
+                      "runAfter": {
+                        "HTTP_Judicatura": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "Var_Respuesta",
+                        "value": "{\"Id_Proceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['tipo_flujo']}\", \"Proceso\":\"Ejecutado\",\"Respuesta\":\"Sin juicios\",\"Respuesta_API\":\"@{outputs('HTTP_Judicatura')['statusCode']}\"}"
+                      }
+                    },
+                    "HTTP_Judicatura": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@variables('URL_Confianza')",
+                        "headers": {
+                          "ApiKey": "@variables('var_ApiKey')"
+                        },
+                        "body": {
+                          "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                          "nombre": "@{outputs('Consejo_de_la_Judicatura')?['body/var_Nombre_Documento']}.pdf",
+                          "archivo": "@{variables('var_Base64')}",
+                          "identificacion": "@{triggerBody()?['numero_documento']}",
+                          "dataKeys": [
+                            {
+                              "clave": "Juicios",
+                              "valor": "false"
+                            }
+                          ],
+                          "tipo": "@{triggerBody()?['tipo_flujo']}"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Set_Base_64_Judicatura": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Set_variable_Respuesta_con_juicios": {
+                        "runAfter": {
+                          "HTTP_Judicatura_si_Juicios": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "Var_Respuesta",
+                          "value": "{\"Id_Proceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['tipo_flujo']}\", \"Proceso\":\"Ejecutado\",\"Respuesta\":\"Con juicios\",\"Respuesta_API\":\"@{outputs('HTTP_Judicatura_si_Juicios')['statusCode']}\"}"
+                        }
+                      },
+                      "HTTP_Judicatura_si_Juicios": {
+                        "runAfter": {},
+                        "type": "Http",
+                        "inputs": {
+                          "method": "POST",
+                          "uri": "@variables('URL_Confianza')",
+                          "headers": {
+                            "ApiKey": "@variables('var_ApiKey')"
+                          },
+                          "body": {
+                            "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                            "nombre": "@{outputs('Consejo_de_la_Judicatura')?['body/var_Nombre_Documento']}.pdf",
+                            "archivo": "@{variables('var_Base64')}",
+                            "identificacion": "@{triggerBody()?['numero_documento']}",
+                            "dataKeys": [
+                              {
+                                "clave": "Juicios",
+                                "valor": "true"
+                              }
+                            ],
+                            "tipo": "@{triggerBody()?['tipo_flujo']}"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "contains": [
+                      "@variables('var_texto_PDF')",
+                      "No se encuentran resultados"
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Guardar_Texto_Consejo_de_la_Judicatura": {
+                  "foreach": "@outputs('Recognize_text_PDF_Judicatura')?['body/responsev2/predictionOutput/results']",
+                  "actions": {
+                    "Guardar_lineas_Consejo_de_la_Judicatura": {
+                      "foreach": "@items('Guardar_Texto_Consejo_de_la_Judicatura')?['lines']",
+                      "actions": {
+                        "Set_Texto_PFD_Judicatura": {
+                          "runAfter": {},
+                          "type": "AppendToStringVariable",
+                          "inputs": {
+                            "name": "var_texto_PDF",
+                            "value": "@{items('Guardar_lineas_Consejo_de_la_Judicatura')?['text']}  "
+                          }
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "Foreach"
+                    }
+                  },
+                  "runAfter": {
+                    "Recognize_text_PDF_Judicatura": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                }
+              }
+            },
+            "Iess": {
+              "case": "Iess",
+              "actions": {
+                "Set_variable_URL_Iess": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Url",
+                    "value": "https://www.iess.gob.ec/empleador-web/pages/morapatronal/certificadoCumplimientoPublico.jsf"
+                  }
+                },
+                "Recognize_text_PDF_Iess": {
+                  "runAfter": {
+                    "Get_file_content_Iess": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "flowSystemMetadata": {
+                      "portalOperationId": "aibuilderpredict_textrecognition",
+                      "portalOperationGroup": "aibuilder",
+                      "portalOperationApiDisplayNameOverride": "AI Builder",
+                      "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                      "portalOperationBrandColorOverride": "#742775",
+                      "portalOperationApiTierOverride": "Standard"
+                    }
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "aibuilderpredict_textrecognition",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "item/requestv2/base64Encoded": "@outputs('Get_file_content_Iess')?['body']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Validar_Obligaciones_Iess": {
+                  "actions": {
+                    "Var_Respuesta_Iess_con_Deuda": {
+                      "runAfter": {
+                        "HTTP_Iess": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "Var_Respuesta",
+                        "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"IEss\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('IESSS')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"Registra deuda\",\"Respuesta_API\":\"@{outputs('HTTP_Iess')['statusCode']}\"}"
+                      }
+                    },
+                    "HTTP_Iess": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@variables('URL_Confianza')",
+                        "headers": {
+                          "ApiKey": "@variables('var_ApiKey')"
+                        },
+                        "body": {
+                          "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                          "nombre": "@{outputs('IESSS')?['body/var_Nombre_Documento']}",
+                          "archivo": "@{variables('var_Base64')}",
+                          "identificacion": "@{triggerBody()?['numero_documento']}",
+                          "dataKeys": [
+                            {
+                              "clave": "Deuda",
+                              "valor": "true"
+                            }
+                          ],
+                          "tipo": "@{triggerBody()?['tipo_flujo']}"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Set_Base_64_IESS": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Var_Respuesat_Iess_sin_Deuda": {
+                        "runAfter": {
+                          "HTTP_Iess_sin_deuda": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "Var_Respuesta",
+                          "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"IEss\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('IESSS')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"NO registra deuda\",\"Respuesta_API\":\"@{outputs('HTTP_Iess_sin_deuda')['statusCode']}\"}"
+                        }
+                      },
+                      "HTTP_Iess_sin_deuda": {
+                        "runAfter": {},
+                        "type": "Http",
+                        "inputs": {
+                          "method": "POST",
+                          "uri": "@variables('URL_Confianza')",
+                          "headers": {
+                            "ApiKey": "@variables('var_ApiKey')"
+                          },
+                          "body": {
+                            "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                            "nombre": "@{outputs('IESSS')?['body/var_Nombre_Documento']}",
+                            "archivo": "@{variables('var_Base64')}",
+                            "identificacion": "@{triggerBody()?['numero_documento']}",
+                            "dataKeys": [
+                              {
+                                "clave": "Deuda",
+                                "valor": "false"
+                              }
+                            ],
+                            "tipo": "@{triggerBody()?['tipo_flujo']}"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "contains": [
+                      "@variables('var_texto_PDF')",
+                      "SI registra obligaciones"
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Get_file_content_Iess": {
+                  "runAfter": {
+                    "IESSS": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_onedriveforbusiness",
+                      "operationId": "GetFileContentByPath",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                    },
+                    "parameters": {
+                      "path": "/Documentos Fianzas/@{triggerBody()?['id_proceso']}/@{outputs('IESSS')?['body/var_Nombre_Documento']}",
+                      "inferContentType": true
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "IESSS": {
+                  "runAfter": {
+                    "Set_variable_URL_Iess": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_uiflow_5",
+                      "operationId": "RunUIFlow_V2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                    },
+                    "parameters": {
+                      "uiFlowId": "fa4210bb-b1af-62c6-7362-5e26a9334e72",
+                      "runMode": "attended",
+                      "item/var_Url": "@variables('var_Url')",
+                      "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                      "item/var_Nombre_Proceso": "@triggerBody()?['tipo_flujo']",
+                      "item/var_IdProceso": "@triggerBody()?['id_proceso']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Set_Base_64_IESS": {
+                  "runAfter": {
+                    "Guardar_Texto_Iess": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Base64",
+                    "value": "@{base64(outputs('Get_file_content_Iess')?['body'])}"
+                  }
+                },
+                "Guardar_Texto_Iess": {
+                  "foreach": "@outputs('Recognize_text_PDF_Iess')?['body/responsev2/predictionOutput/results']",
+                  "actions": {
+                    "Lineas_Iess": {
+                      "foreach": "@items('Guardar_Texto_Iess')?['lines']",
+                      "actions": {
+                        "Set_Texto_PDF_Iess": {
+                          "runAfter": {},
+                          "type": "AppendToStringVariable",
+                          "inputs": {
+                            "name": "var_texto_PDF",
+                            "value": "@{items('Lineas_Iess')?['text']}  "
+                          }
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "Foreach"
+                    }
+                  },
+                  "runAfter": {
+                    "Recognize_text_PDF_Iess": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                }
+              }
+            },
+            "Contratacion_Publica": {
+              "case": "Contratacion Publica",
+              "actions": {
+                "Set_variable_URL_Contratacion_Publica": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Url",
+                    "value": "https://www.compraspublicas.gob.ec/ProcesoContratacion/compras/EP/EmpReporteIncumplidos.cpe?sg=1"
+                  }
+                },
+                "Contratacion_Publica": {
+                  "runAfter": {
+                    "Set_variable_URL_Contratacion_Publica": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_uiflow_5",
+                      "operationId": "RunUIFlow_V2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                    },
+                    "parameters": {
+                      "uiFlowId": "33ff512c-286d-4543-8f35-ab166faf2b56",
+                      "runMode": "attended",
+                      "item/var_Nombre_Proceso": "@triggerBody()?['tipo_flujo']",
+                      "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                      "item/var_Url": "@variables('var_Url')",
+                      "item/var_id_Proceso": "@triggerBody()?['id_proceso']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Recognize_text_PDF_Contratacion_Publica": {
+                  "runAfter": {
+                    "Get_file_content_Contratacion_Publica": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "flowSystemMetadata": {
+                      "portalOperationId": "aibuilderpredict_textrecognition",
+                      "portalOperationGroup": "aibuilder",
+                      "portalOperationApiDisplayNameOverride": "AI Builder",
+                      "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                      "portalOperationBrandColorOverride": "#742775",
+                      "portalOperationApiTierOverride": "Standard"
+                    }
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "aibuilderpredict_textrecognition",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "item/requestv2/base64Encoded": "@outputs('Get_file_content_Contratacion_Publica')?['body']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Apply_to_each_Result_Contratacion_Publica": {
+                  "foreach": "@outputs('Recognize_text_PDF_Contratacion_Publica')?['body/responsev2/predictionOutput/results']",
+                  "actions": {
+                    "Apply_to_each_6": {
+                      "foreach": "@items('Apply_to_each_Result_Contratacion_Publica')?['lines']",
+                      "actions": {
+                        "Set_Texto_PDF_Contratacion_Publica": {
+                          "runAfter": {},
+                          "type": "AppendToStringVariable",
+                          "inputs": {
+                            "name": "var_texto_PDF",
+                            "value": "@item()?['text']"
+                          }
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "Foreach"
+                    }
+                  },
+                  "runAfter": {
+                    "Recognize_text_PDF_Contratacion_Publica": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "Set_Base_64_Contratacion_Publica": {
+                  "runAfter": {
+                    "Apply_to_each_Result_Contratacion_Publica": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Base64",
+                    "value": "@{base64(outputs('Get_file_content_Contratacion_Publica')?['body'])}"
+                  }
+                },
+                "Condition_INCOP": {
+                  "actions": {
+                    "Set_variable": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "Var_Respuesta",
+                        "value": "true"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Set_Base_64_Contratacion_Publica": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Set_variable_2": {
+                        "runAfter": {},
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "Var_Respuesta",
+                          "value": "false"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "contains": [
+                      "@variables('var_texto_PDF')",
+                      "No se encontró resultados con éste criterio de búsqueda en la base de datos del INCOP"
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Condition_Contraloría": {
+                  "actions": {
+                    "HTTP": {
+                      "runAfter": {},
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@variables('URL_Confianza')",
+                        "headers": {
+                          "ApiKey": "@variables('var_ApiKey')"
+                        },
+                        "body": {
+                          "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                          "nombre": "@{outputs('Contratacion_Publica')?['body/var_Nombre_Documento']}.pdf",
+                          "archivo": "@{variables('var_Base64')}",
+                          "identificacion": "@{triggerBody()?['numero_documento']}",
+                          "dataKeys": [
+                            {
+                              "clave": "Contraloria",
+                              "valor": "false"
+                            },
+                            {
+                              "clave": "INCOP",
+                              "valor": "@{variables('Var_Respuesta')}"
+                            }
+                          ],
+                          "tipo": "@{triggerBody()?['tipo_flujo']}"
+                        }
+                      }
+                    },
+                    "Set_variable_Respuesta_sin_impedimentos": {
+                      "runAfter": {
+                        "HTTP": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "Var_Respuesta",
+                        "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['tipo_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Contratacion_Publica')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"NO registra impedimentos\",\"Respuesta_API\":\"@{outputs('HTTP')['statusCode']}\"}"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Condition_INCOP": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "HTTP_2": {
+                        "runAfter": {},
+                        "type": "Http",
+                        "inputs": {
+                          "method": "POST",
+                          "uri": "@variables('URL_Confianza')",
+                          "headers": {
+                            "ApiKey": "@variables('var_ApiKey')"
+                          },
+                          "body": {
+                            "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                            "nombre": "@{outputs('Contratacion_Publica')?['body/var_Nombre_Documento']}.pdf",
+                            "archivo": "@{variables('var_Base64')}",
+                            "identificacion": "@{triggerBody()?['numero_documento']}",
+                            "dataKeys": [
+                              {
+                                "clave": "Contraloria",
+                                "valor": "false"
+                              },
+                              {
+                                "clave": "INCOP",
+                                "valor": "@{variables('Var_Respuesta')}"
+                              }
+                            ],
+                            "tipo": "@{triggerBody()?['tipo_flujo']}"
+                          }
+                        }
+                      },
+                      "Set_variable_3": {
+                        "runAfter": {
+                          "HTTP_2": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "Var_Respuesta",
+                          "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['tipo_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Contratacion_Publica')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"Registra impedimentos\",\"Respuesta_API\":\"@{outputs('HTTP_2')['statusCode']}\"}"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "contains": [
+                      "@variables('var_texto_PDF')",
+                      "No se encontró resultados con éste criterio de búsqueda en la base de datos de la Contraloría"
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Get_file_content_Contratacion_Publica": {
+                  "runAfter": {
+                    "Contratacion_Publica": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_onedriveforbusiness",
+                      "operationId": "GetFileContentByPath",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                    },
+                    "parameters": {
+                      "path": "/Documentos Fianzas/@{trim(outputs('Contratacion_Publica')?['body/var_Nombre_Documento'])}.pdf",
+                      "inferContentType": true
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                }
+              }
+            },
+            "Sri": {
+              "case": "Sri",
+              "actions": {
+                "Set_variable_URL_SRI": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "var_Url",
+                    "value": "https://srienlinea.sri.gob.ec/sri-en-linea/SriDeclaracionesWeb/EstadoTributario/Consultas/consultaEstadoTributario"
+                  }
+                },
+                "SRI": {
+                  "runAfter": {
+                    "Set_variable_URL_SRI": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_uiflow_3",
+                      "operationId": "RunUIFlow_V2",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                    },
+                    "parameters": {
+                      "uiFlowId": "4a0a7179-6793-4d8b-b404-1cb09dde5d0a",
+                      "runMode": "attended",
+                      "item/var_Nombre_Proceso": "@triggerBody()?['tipo_flujo']",
+                      "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                      "item/var_Url": "@variables('var_Url')",
+                      "item/var_id_Proceso": "@triggerBody()?['id_proceso']",
+                      "item/x": "@variables('SRIx')",
+                      "item/y": "@variables('SRIy')"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Get_file_content_SRI_1": {
+                  "runAfter": {
+                    "SRI": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_onedriveforbusiness",
+                      "operationId": "GetFileContentByPath",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                    },
+                    "parameters": {
+                      "path": "/Documentos Fianzas/@{outputs('SRI')?['body/var_Nombre_Documento']}-1.pdf",
+                      "inferContentType": true
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Get_file_content_SRI_2": {
+                  "runAfter": {
+                    "Get_file_content_SRI_1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_onedriveforbusiness",
+                      "operationId": "GetFileContentByPath",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                    },
+                    "parameters": {
+                      "path": "/Documentos Fianzas/@{outputs('SRI')?['body/var_Nombre_Documento']}-2.pdf",
+                      "inferContentType": true
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Recognize_text_PDF_SRI_1": {
+                  "runAfter": {
+                    "Get_file_content_SRI_2": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "flowSystemMetadata": {
+                      "portalOperationId": "aibuilderpredict_textrecognition",
+                      "portalOperationGroup": "aibuilder",
+                      "portalOperationApiDisplayNameOverride": "AI Builder",
+                      "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                      "portalOperationBrandColorOverride": "#742775",
+                      "portalOperationApiTierOverride": "Standard"
+                    }
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "aibuilderpredict_textrecognition",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "item/requestv2/base64Encoded": "@outputs('Get_file_content_SRI_1')?['body']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Recognize_text_PDF_SRI_2": {
+                  "runAfter": {
+                    "Recognize_text_PDF_SRI_1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "flowSystemMetadata": {
+                      "portalOperationId": "aibuilderpredict_textrecognition",
+                      "portalOperationGroup": "aibuilder",
+                      "portalOperationApiDisplayNameOverride": "AI Builder",
+                      "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                      "portalOperationBrandColorOverride": "#742775",
+                      "portalOperationApiTierOverride": "Standard"
+                    }
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "host": {
+                      "connectionName": "shared_commondataserviceforapps",
+                      "operationId": "aibuilderpredict_textrecognition",
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                    },
+                    "parameters": {
+                      "item/requestv2/base64Encoded": "@outputs('Get_file_content_SRI_2')?['body']"
+                    },
+                    "authentication": "@parameters('$authentication')"
+                  }
+                },
+                "Guardar_Texto_SRI": {
+                  "foreach": "@outputs('Recognize_text_PDF_SRI_2')?['body/responsev2/predictionOutput/results']",
+                  "actions": {
+                    "Guardar_Lineas_SRI": {
+                      "foreach": "@items('Guardar_Texto_SRI')?['lines']",
+                      "actions": {
+                        "Append_to_string_variable": {
+                          "runAfter": {},
+                          "type": "AppendToStringVariable",
+                          "inputs": {
+                            "name": "var_texto_PDF",
+                            "value": "@items('Guardar_Lineas_SRI')?['text']"
+                          }
+                        }
+                      },
+                      "runAfter": {},
+                      "type": "Foreach"
+                    }
+                  },
+                  "runAfter": {
+                    "Recognize_text_PDF_SRI_2": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "Validar_Deudas_Firmes_SRI": {
+                  "actions": {
+                    "Set_variable_Base_64_SRI_con_deuda_firme": {
+                      "runAfter": {},
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "var_Base64",
+                        "value": "@{base64(outputs('Get_file_content_SRI_2')?['body'])}"
+                      }
+                    },
+                    "Apply_to_each_8": {
+                      "foreach": "@outputs('Recognize_text_PDF_SRI_2')?['body/responsev2/predictionOutput/results']",
+                      "actions": {
+                        "Apply_to_each_9": {
+                          "foreach": "@items('Apply_to_each_8')?['lines']",
+                          "actions": {
+                            "Set_variable_PDF_conn_deudas_firmes": {
+                              "runAfter": {},
+                              "type": "AppendToStringVariable",
+                              "inputs": {
+                                "name": "var_texto_PDF",
+                                "value": "@item()?['text']"
+                              }
+                            }
+                          },
+                          "runAfter": {},
+                          "type": "Foreach"
+                        }
+                      },
+                      "runAfter": {
+                        "Set_variable_Base_64_SRI_con_deuda_firme": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Foreach"
+                    },
+                    "HTTP_SRI_con_deudas_firmes": {
+                      "runAfter": {
+                        "Find_text_position": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Http",
+                      "inputs": {
+                        "method": "POST",
+                        "uri": "@variables('URL_Confianza')",
+                        "headers": {
+                          "ApiKey": "@variables('var_ApiKey')"
+                        },
+                        "body": {
+                          "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                          "nombre": "@{outputs('SRI')?['body/var_Nombre_Documento']}.pdf",
+                          "archivo": "@{variables('var_Base64')}",
+                          "identificacion": "@{triggerBody()?['numero_documento']}",
+                          "dataKeys": [
+                            {
+                              "clave": "Deudas Firmes",
+                              "valor": "true"
+                            }
+                          ],
+                          "tipo": "@{triggerBody()?['tipo_flujo']}"
+                        }
+                      }
+                    },
+                    "Set_variable_Respuesta_con_deudas_firmes": {
+                      "runAfter": {
+                        "HTTP_SRI_con_deudas_firmes": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "SetVariable",
+                      "inputs": {
+                        "name": "Var_Respuesta",
+                        "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['tipo_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('SRI')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"Registra impedimentos\",\"Respuesta_API\":\"@{outputs('HTTP_SRI_con_deudas_firmes')['statusCode']}\"}"
+                      }
+                    },
+                    "Find_text_position": {
+                      "runAfter": {
+                        "Apply_to_each_8": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Expression",
+                      "kind": "IndexOf",
+                      "inputs": {
+                        "text": "@variables('var_texto_PDF')",
+                        "searchText": "Valor total : USD $"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Guardar_Texto_SRI": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Set_variable_Base_64_SRI": {
+                        "runAfter": {},
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "var_Base64",
+                          "value": "@{base64(outputs('Get_file_content_SRI_1')?['body'])}"
+                        }
+                      },
+                      "HTTP_SRI_sin_Deudas_Firmes": {
+                        "runAfter": {
+                          "Set_variable_Base_64_SRI": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "Http",
+                        "inputs": {
+                          "method": "POST",
+                          "uri": "@variables('URL_Confianza')",
+                          "headers": {
+                            "ApiKey": "@variables('var_ApiKey')"
+                          },
+                          "body": {
+                            "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                            "nombre": "@{outputs('SRI')?['body/var_Nombre_Documento']}.pdf",
+                            "archivo": "@{variables('var_Base64')}",
+                            "identificacion": "@{triggerBody()?['numero_documento']}",
+                            "dataKeys": [
+                              {
+                                "clave": "Deudas Firmes",
+                                "valor": "false"
+                              }
+                            ],
+                            "tipo": "@{triggerBody()?['tipo_flujo']}"
+                          }
+                        }
+                      },
+                      "Set_variable_Respuesta_sin_deudas_firmes": {
+                        "runAfter": {
+                          "HTTP_SRI_sin_Deudas_Firmes": [
+                            "Succeeded"
+                          ]
+                        },
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "Var_Respuesta",
+                          "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['tipo_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('SRI')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"Registra impedimentos\",\"Respuesta_API\":\"@{outputs('HTTP_SRI_sin_Deudas_Firmes')['statusCode']}\"}"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "contains": [
+                      "@variables('var_texto_PDF')",
+                      "Deuda"
+                    ]
+                  },
+                  "type": "If"
+                }
+              }
+            },
+            "SC": {
+              "case": "SC",
+              "actions": {
+                "Flujos_Super_de_Compañias": {
+                  "runAfter": {},
+                  "cases": {
+                    "Informacion_General": {
+                      "case": "Informacion General",
+                      "actions": {
+                        "Set_variable_URL_Informacion_General": {
+                          "runAfter": {},
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "var_Url",
+                            "value": "https://appscvsconsultas.supercias.gob.ec/consultaCompanias/busquedaCompanias.jsf"
+                          }
+                        },
+                        "Información_General": {
+                          "runAfter": {
+                            "Set_variable_URL_Informacion_General": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connectionName": "shared_uiflow_4",
+                              "operationId": "RunUIFlow_V2",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                            },
+                            "parameters": {
+                              "uiFlowId": "bec86a44-6fe3-4124-a6f8-bd75f8bd94fd",
+                              "runMode": "attended",
+                              "item/var_Nombre_Proceso": "@triggerBody()?['sub_flujo']",
+                              "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                              "item/var_Url": "@variables('var_Url')",
+                              "item/var_id_Proceso": "@triggerBody()?['id_proceso']",
+                              "item/var_RutaDocumento": "C:\\Users\\usr_servicios_rpa\\OneDrive - SEGUROS CONFIANZA S.A\\Documentos Fianzas",
+                              "item/x": "@variables('SCx1')",
+                              "item/y": "@variables('SCy1')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Existe_documento_Informacion_General": {
+                          "actions": {
+                            "Get_file_content_Informacion_General": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileContentByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Información_General')?['body/var_Nombre_Documento']}",
+                                  "inferContentType": true
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Set_variable_Base_64_Informacion_General": {
+                              "runAfter": {
+                                "Get_file_content_Informacion_General": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "var_Base64",
+                                "value": "@{base64(outputs('Get_file_content_Informacion_General')?['body'])}"
+                              }
+                            },
+                            "Recognize_text_PDF_Informacion_General": {
+                              "runAfter": {
+                                "Set_variable_Base_64_Informacion_General": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "flowSystemMetadata": {
+                                  "portalOperationId": "aibuilderpredict_textrecognition",
+                                  "portalOperationGroup": "aibuilder",
+                                  "portalOperationApiDisplayNameOverride": "AI Builder",
+                                  "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                                  "portalOperationBrandColorOverride": "#742775",
+                                  "portalOperationApiTierOverride": "Standard"
+                                }
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "aibuilderpredict_textrecognition",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "item/requestv2/base64Encoded": "@outputs('Get_file_content_Informacion_General')?['body']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Guardar_texto_Informacion_General": {
+                              "foreach": "@outputs('Recognize_text_PDF_Informacion_General')?['body/responsev2/predictionOutput/results']",
+                              "actions": {
+                                "Guardar_lineas_Informacion_General": {
+                                  "foreach": "@items('Guardar_texto_Informacion_General')?['lines']",
+                                  "actions": {
+                                    "String_PDF_Informacion_General": {
+                                      "runAfter": {},
+                                      "type": "AppendToStringVariable",
+                                      "inputs": {
+                                        "name": "var_texto_PDF",
+                                        "value": "@{items('Guardar_lineas_Informacion_General')?['text']} "
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "Foreach"
+                                }
+                              },
+                              "runAfter": {
+                                "Recognize_text_PDF_Informacion_General": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Foreach"
+                            },
+                            "HTTP_Informacion_Basica": {
+                              "runAfter": {
+                                "Guardar_texto_Informacion_General": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Http",
+                              "inputs": {
+                                "method": "POST",
+                                "uri": "@variables('URL_Confianza')",
+                                "headers": {
+                                  "ApiKey": "@variables('var_ApiKey')"
+                                },
+                                "body": {
+                                  "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                  "nombre": "@{outputs('Información_General')?['body/var_Nombre_Documento']}.pdf",
+                                  "archivo": "@{variables('var_Base64')}",
+                                  "identificacion": "@{triggerBody()?['numero_documento']}",
+                                  "dataKeys": [
+                                    {
+                                      "clave": "null",
+                                      "valor": "null"
+                                    }
+                                  ],
+                                  "tipo": "@{triggerBody()?['sub_flujo']}"
+                                }
+                              }
+                            },
+                            "Set_variable_Respuesta_Informacion_Basica": {
+                              "runAfter": {
+                                "HTTP_Informacion_Basica": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "Var_Respuesta",
+                                "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Información_General')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Informacion_Basica')['statusCode']}\"}"
+                              }
+                            },
+                            "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso": {
+                              "runAfter": {
+                                "Set_variable_Respuesta_Informacion_Basica": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileMetadataByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Información_General')?['body/var_Nombre_Documento']}"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Eliminar_archivo": {
+                              "runAfter": {
+                                "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "DeleteFile",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "id": "@outputs('Obtener_metadatos_de_archivo_mediante_ruta_de_acceso')?['body/Id']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Información_General": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "HTTP_Informacion_Basica_Error": {
+                                "runAfter": {},
+                                "type": "Http",
+                                "inputs": {
+                                  "method": "POST",
+                                  "uri": "@variables('URL_Confianza')",
+                                  "headers": {
+                                    "ApiKey": "@variables('var_ApiKey')"
+                                  },
+                                  "body": {
+                                    "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                    "nombre": "@{outputs('Información_General')?['body/var_Nombre_Documento']}",
+                                    "archivo": "",
+                                    "identificacion": "@{triggerBody()?['numero_documento']}",
+                                    "dataKeys": [
+                                      {
+                                        "clave": "null",
+                                        "valor": "null"
+                                      }
+                                    ],
+                                    "tipo": "@{triggerBody()?['sub_flujo']}"
+                                  }
+                                }
+                              },
+                              "Set_variable_Respuesta_Informacion_Basica_Error": {
+                                "runAfter": {
+                                  "HTTP_Informacion_Basica_Error": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "Var_Respuesta",
+                                  "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"No ejecutado numero de docuento no valido\", \"Numerode Documento\":\"@{triggerBody()?['numero_documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Informacion_Basica_Error')['statusCode']}\"}"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "not": {
+                              "equals": [
+                                "@outputs('Información_General')?['body/var_Nombre_Documento']",
+                                "Numero no existe"
+                              ]
+                            }
+                          },
+                          "type": "If"
+                        }
+                      }
+                    },
+                    "Administradores": {
+                      "case": "Administradores",
+                      "actions": {
+                        "Set_variable_URL_Administradores": {
+                          "runAfter": {},
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "var_Url",
+                            "value": "https://appscvsconsultas.supercias.gob.ec/consultaCompanias/busquedaCompanias.jsf"
+                          }
+                        },
+                        "Administradores": {
+                          "runAfter": {
+                            "Set_variable_URL_Administradores": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connectionName": "shared_uiflow_4",
+                              "operationId": "RunUIFlow_V2",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                            },
+                            "parameters": {
+                              "uiFlowId": "0f832186-9d0e-4039-8c49-d0c2482e8a73",
+                              "runMode": "attended",
+                              "item/var_Nombre_Proceso": "@triggerBody()?['sub_flujo']",
+                              "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                              "item/var_Url": "@variables('var_Url')",
+                              "item/var_id_Proceso": "@triggerBody()?['id_proceso']",
+                              "item/var_RutaDocumento": "C:\\Users\\usr_servicios_rpa\\OneDrive - SEGUROS CONFIANZA S.A\\Documentos Fianzas",
+                              "item/x": "@variables('SCx1')",
+                              "item/y": "@variables('SCy1')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Existe_documentos_Administradores": {
+                          "actions": {
+                            "Get_file_content_Administradores": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileContentByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Administradores')?['body/var_Nombre_Documento']}",
+                                  "inferContentType": true
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Set_variable_Base_64_Administradores": {
+                              "runAfter": {
+                                "Get_file_content_Administradores": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "var_Base64",
+                                "value": "@{base64(outputs('Get_file_content_Administradores')?['body'])}"
+                              }
+                            },
+                            "Recognize_text_PDF_Administradores": {
+                              "runAfter": {
+                                "Set_variable_Base_64_Administradores": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "flowSystemMetadata": {
+                                  "portalOperationId": "aibuilderpredict_textrecognition",
+                                  "portalOperationGroup": "aibuilder",
+                                  "portalOperationApiDisplayNameOverride": "AI Builder",
+                                  "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                                  "portalOperationBrandColorOverride": "#742775",
+                                  "portalOperationApiTierOverride": "Standard"
+                                }
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "aibuilderpredict_textrecognition",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "item/requestv2/base64Encoded": "@outputs('Get_file_content_Administradores')?['body']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Guardar_Texto_Administradores": {
+                              "foreach": "@outputs('Recognize_text_PDF_Administradores')?['body/responsev2/predictionOutput/results']",
+                              "actions": {
+                                "Guardar_lineas_Administradores": {
+                                  "foreach": "@items('Guardar_Texto_Administradores')?['lines']",
+                                  "actions": {
+                                    "String_PDF_Administradores": {
+                                      "runAfter": {},
+                                      "type": "AppendToStringVariable",
+                                      "inputs": {
+                                        "name": "var_texto_PDF",
+                                        "value": "@{items('Guardar_lineas_Administradores')?['text']} "
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "Foreach"
+                                }
+                              },
+                              "runAfter": {
+                                "Recognize_text_PDF_Administradores": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Foreach"
+                            },
+                            "HTTP_Administradores": {
+                              "runAfter": {
+                                "Guardar_Texto_Administradores": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Http",
+                              "inputs": {
+                                "method": "POST",
+                                "uri": "@variables('URL_Confianza')",
+                                "headers": {
+                                  "ApiKey": "@variables('var_ApiKey')"
+                                },
+                                "body": {
+                                  "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                  "nombre": "@{outputs('Administradores')?['body/var_Nombre_Documento']}.pdf",
+                                  "archivo": "@{variables('var_Base64')}",
+                                  "identificacion": "@{triggerBody()?['numero_documento']}",
+                                  "dataKeys": [
+                                    {
+                                      "clave": "null",
+                                      "valor": "null"
+                                    }
+                                  ],
+                                  "tipo": "@{triggerBody()?['sub_flujo']}"
+                                }
+                              }
+                            },
+                            "Set_variable_Respuesta_Administradores": {
+                              "runAfter": {
+                                "HTTP_Administradores": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "Var_Respuesta",
+                                "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Administradores')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Administradores')['statusCode']}\"}"
+                              }
+                            },
+                            "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_2": {
+                              "runAfter": {
+                                "Set_variable_Respuesta_Administradores": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileMetadataByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Administradores')?['body/var_Nombre_Documento']}"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Eliminar_archivo_2": {
+                              "runAfter": {
+                                "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "DeleteFile",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "id": "@outputs('Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_2')?['body/Id']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Administradores": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "HTTP_Administradores_Error": {
+                                "runAfter": {},
+                                "type": "Http",
+                                "inputs": {
+                                  "method": "POST",
+                                  "uri": "@variables('URL_Confianza')",
+                                  "headers": {
+                                    "ApiKey": "@variables('var_ApiKey')"
+                                  },
+                                  "body": {
+                                    "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                    "nombre": "@{outputs('Administradores')?['body/var_Nombre_Documento']}",
+                                    "archivo": "",
+                                    "identificacion": "@{triggerBody()?['numero_documento']}",
+                                    "dataKeys": [
+                                      {
+                                        "clave": "null",
+                                        "valor": "null"
+                                      }
+                                    ],
+                                    "tipo": "@{triggerBody()?['sub_flujo']}"
+                                  }
+                                }
+                              },
+                              "Set_variable_Respuesta_Administradores_Error": {
+                                "runAfter": {
+                                  "HTTP_Administradores_Error": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "Var_Respuesta",
+                                  "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"No ejecutado numero de docuento no valido\", \"Numerode Documento\":\"@{triggerBody()?['numero_documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Administradores_Error')['statusCode']}\"}"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "not": {
+                              "equals": [
+                                "@outputs('Administradores')?['body/var_Nombre_Documento']",
+                                "Numero no existe"
+                              ]
+                            }
+                          },
+                          "type": "If"
+                        }
+                      }
+                    },
+                    "Consulta_Cumplimiento": {
+                      "case": "Consulta Cumplimiento",
+                      "actions": {
+                        "Set_variable_URL_Consulta_Cumplimiento": {
+                          "runAfter": {},
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "var_Url",
+                            "value": "https://appscvsconsultas.supercias.gob.ec/consultaCompanias/busquedaCompanias.jsf"
+                          }
+                        },
+                        "Consulta_Cumplimiento": {
+                          "runAfter": {
+                            "Set_variable_URL_Consulta_Cumplimiento": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connectionName": "shared_uiflow_4",
+                              "operationId": "RunUIFlow_V2",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                            },
+                            "parameters": {
+                              "uiFlowId": "4729f7f5-8440-4c85-a87a-eb92263acb7d",
+                              "runMode": "attended",
+                              "item/var_Nombre_Proceso": "@triggerBody()?['sub_flujo']",
+                              "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                              "item/var_Url": "@variables('var_Url')",
+                              "item/var_id_Proceso": "@triggerBody()?['id_proceso']",
+                              "item/var_RutaDocumento": "C:\\Users\\usr_servicios_rpa\\OneDrive - SEGUROS CONFIANZA S.A\\Documentos Fianzas",
+                              "item/x": "@variables('SCx1')",
+                              "item/y": "@variables('SCy1')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Existe_Documento_Consulta_Cumplimiento": {
+                          "actions": {
+                            "Get_file_content_Consulta_Cumplimiento": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileContentByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}",
+                                  "inferContentType": true
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Set_variable_Base_64_Consulta_Cumplimiento": {
+                              "runAfter": {
+                                "Get_file_content_Consulta_Cumplimiento": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "var_Base64",
+                                "value": "@{base64(outputs('Get_file_content_Consulta_Cumplimiento')?['body'])}"
+                              }
+                            },
+                            "Recognize_text_PDF_Consulta_Cumplimiento": {
+                              "runAfter": {
+                                "Set_variable_Base_64_Consulta_Cumplimiento": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "flowSystemMetadata": {
+                                  "portalOperationId": "aibuilderpredict_textrecognition",
+                                  "portalOperationGroup": "aibuilder",
+                                  "portalOperationApiDisplayNameOverride": "AI Builder",
+                                  "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                                  "portalOperationBrandColorOverride": "#742775",
+                                  "portalOperationApiTierOverride": "Standard"
+                                }
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "aibuilderpredict_textrecognition",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "item/requestv2/base64Encoded": "@outputs('Get_file_content_Consulta_Cumplimiento')?['body']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Guardar_Texto_Consulta_Cumplimiento": {
+                              "foreach": "@outputs('Recognize_text_PDF_Consulta_Cumplimiento')?['body/responsev2/predictionOutput/results']",
+                              "actions": {
+                                "Guardar_lineas_Consulta_Cumplimiento": {
+                                  "foreach": "@items('Guardar_Texto_Consulta_Cumplimiento')?['lines']",
+                                  "actions": {
+                                    "String_PDF_Consulta_Cumplimiento": {
+                                      "runAfter": {},
+                                      "type": "AppendToStringVariable",
+                                      "inputs": {
+                                        "name": "var_texto_PDF",
+                                        "value": "@items('Guardar_lineas_Consulta_Cumplimiento')?['text']"
+                                      }
+                                    },
+                                    "String_PDF_Consulta_Cumplimiento_espacio": {
+                                      "runAfter": {
+                                        "String_PDF_Consulta_Cumplimiento": [
+                                          "Succeeded"
+                                        ]
+                                      },
+                                      "type": "AppendToStringVariable",
+                                      "inputs": {
+                                        "name": "var_texto_PDF",
+                                        "value": " "
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "Foreach"
+                                }
+                              },
+                              "runAfter": {
+                                "Recognize_text_PDF_Consulta_Cumplimiento": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Foreach"
+                            },
+                            "Buscar_posicion_de_Obligaciones": {
+                              "runAfter": {
+                                "Guardar_Texto_Consulta_Cumplimiento": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Expression",
+                              "kind": "IndexOf",
+                              "inputs": {
+                                "text": "@variables('var_texto_PDF')",
+                                "searchText": "OBLIGACIONES:"
+                              }
+                            },
+                            "Set_variable_Deuda_Pendiente": {
+                              "runAfter": {
+                                "Buscar_posicion_de_Obligaciones": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "var_DeudaPendiente",
+                                "value": "@{substring(variables('var_texto_PDF'),add(outputs('Buscar_posicion_de_Obligaciones')?['body'],14),2)}"
+                              }
+                            },
+                            "Validar_Obligaciones_Pendientes": {
+                              "actions": {
+                                "HTTP_Consulta_Cumplimiento_con_Obligaciones": {
+                                  "runAfter": {},
+                                  "type": "Http",
+                                  "inputs": {
+                                    "method": "POST",
+                                    "uri": "@variables('URL_Confianza')",
+                                    "headers": {
+                                      "ApiKey": "@variables('var_ApiKey')"
+                                    },
+                                    "body": {
+                                      "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                      "nombre": "@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}.pdf",
+                                      "archivo": "@{variables('var_Base64')}",
+                                      "identificacion": "@{triggerBody()?['numero_documento']}",
+                                      "dataKeys": [
+                                        {
+                                          "clave": "Obligaciones_Pendietes",
+                                          "valor": "true"
+                                        }
+                                      ],
+                                      "tipo": "@{triggerBody()?['sub_flujo']}"
+                                    }
+                                  }
+                                },
+                                "Set_variable_Respuesta_Consuta_Cumplimiento_con_Obligaciones": {
+                                  "runAfter": {
+                                    "HTTP_Consulta_Cumplimiento_con_Obligaciones": [
+                                      "Succeeded"
+                                    ]
+                                  },
+                                  "type": "SetVariable",
+                                  "inputs": {
+                                    "name": "Var_Respuesta",
+                                    "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Consulta_Cumplimiento_con_Obligaciones')['statusCode']}\"}"
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "Set_variable_Deuda_Pendiente": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "else": {
+                                "actions": {
+                                  "HTTP_Consulta_Cumplimiento_sin_Obligaciones": {
+                                    "runAfter": {},
+                                    "type": "Http",
+                                    "inputs": {
+                                      "method": "POST",
+                                      "uri": "@variables('URL_Confianza')",
+                                      "headers": {
+                                        "ApiKey": "@variables('var_ApiKey')"
+                                      },
+                                      "body": {
+                                        "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                        "nombre": "@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}.pdf",
+                                        "archivo": "@{variables('var_Base64')}",
+                                        "identificacion": "@{triggerBody()?['numero_documento']}",
+                                        "dataKeys": [
+                                          {
+                                            "clave": "Obligaciones_Pendietes",
+                                            "valor": "false"
+                                          }
+                                        ],
+                                        "tipo": "@{triggerBody()?['sub_flujo']}"
+                                      }
+                                    }
+                                  },
+                                  "Set_variable_respuesta_Consulta_Cumplimiento_sin_Obligaciones": {
+                                    "runAfter": {
+                                      "HTTP_Consulta_Cumplimiento_sin_Obligaciones": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "type": "SetVariable",
+                                    "inputs": {
+                                      "name": "Var_Respuesta",
+                                      "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Consulta_Cumplimiento_sin_Obligaciones')['statusCode']}\"}"
+                                    }
+                                  }
+                                }
+                              },
+                              "expression": {
+                                "equals": [
+                                  "@variables('var_DeudaPendiente')",
+                                  "SI"
+                                ]
+                              },
+                              "type": "If"
+                            },
+                            "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_3": {
+                              "runAfter": {
+                                "Validar_Obligaciones_Pendientes": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileMetadataByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Eliminar_archivo_3": {
+                              "runAfter": {
+                                "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_3": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness_1",
+                                  "operationId": "DeleteFile",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "id": "@outputs('Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_3')?['body/Id']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Consulta_Cumplimiento": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "HTTP_Consulta_Cumplimiento_Error": {
+                                "runAfter": {},
+                                "type": "Http",
+                                "inputs": {
+                                  "method": "POST",
+                                  "uri": "@variables('URL_Confianza')",
+                                  "headers": {
+                                    "ApiKey": "@variables('var_ApiKey')"
+                                  },
+                                  "body": {
+                                    "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                    "nombre": "@{outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']}",
+                                    "archivo": "",
+                                    "identificacion": "@{triggerBody()?['numero_documento']}",
+                                    "dataKeys": [
+                                      {
+                                        "clave": "null",
+                                        "valor": "null"
+                                      }
+                                    ],
+                                    "tipo": "@{triggerBody()?['sub_flujo']}"
+                                  }
+                                }
+                              },
+                              "Set_variable_Respuesta__Consulta_Cumplimiento_Error": {
+                                "runAfter": {
+                                  "HTTP_Consulta_Cumplimiento_Error": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "Var_Respuesta",
+                                  "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"No ejecutado numero de docuento no valido\", \"Numerode Documento\":\"@{triggerBody()?['numero_documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Consulta_Cumplimiento_Error')['statusCode']}\"}"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "not": {
+                              "equals": [
+                                "@outputs('Consulta_Cumplimiento')?['body/var_Nombre_Documento']",
+                                "Numero no existe"
+                              ]
+                            }
+                          },
+                          "type": "If"
+                        }
+                      }
+                    },
+                    "Socios_Accionistas": {
+                      "case": "Socios Accionistas",
+                      "actions": {
+                        "Set_variable_URL_Socios_Accionistas": {
+                          "runAfter": {},
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "var_Url",
+                            "value": "https://appscvsconsultas.supercias.gob.ec/consultaCompanias/busquedaCompanias.jsf"
+                          }
+                        },
+                        "Socios_Accionistas": {
+                          "runAfter": {
+                            "Set_variable_URL_Socios_Accionistas": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "host": {
+                              "connectionName": "shared_uiflow_4",
+                              "operationId": "RunUIFlow_V2",
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_uiflow"
+                            },
+                            "parameters": {
+                              "uiFlowId": "d4fb4e33-0efd-4969-a3bb-394f803acd70",
+                              "runMode": "attended",
+                              "item/var_Nombre_Proceso": "@triggerBody()?['sub_flujo']",
+                              "item/var_NumeroDocumento": "@triggerBody()?['numero_documento']",
+                              "item/var_Url": "@variables('var_Url')",
+                              "item/var_id_Proceso": "@triggerBody()?['id_proceso']",
+                              "item/var_RutaDocumento": "C:\\Users\\usr_servicios_rpa\\OneDrive - SEGUROS CONFIANZA S.A\\Documentos Fianzas",
+                              "item/x": "@variables('SCx1')",
+                              "item/y": "@variables('SCy1')"
+                            },
+                            "authentication": "@parameters('$authentication')"
+                          }
+                        },
+                        "Existe_Documnto_Socios_Accionistas": {
+                          "actions": {
+                            "Get_file_content_Socios_Accionistas": {
+                              "runAfter": {},
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness",
+                                  "operationId": "GetFileContentByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Socios_Accionistas')?['body/var_Nombre_Documento']}",
+                                  "inferContentType": true
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Set_variable_Base_64_Socios_Accionistas": {
+                              "runAfter": {
+                                "Get_file_content_Socios_Accionistas": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "var_Base64",
+                                "value": "@{base64(outputs('Get_file_content_Socios_Accionistas')?['body'])}"
+                              }
+                            },
+                            "Recognize_text_PDF_Socios_Accionistas": {
+                              "runAfter": {
+                                "Set_variable_Base_64_Socios_Accionistas": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "flowSystemMetadata": {
+                                  "portalOperationId": "aibuilderpredict_textrecognition",
+                                  "portalOperationGroup": "aibuilder",
+                                  "portalOperationApiDisplayNameOverride": "AI Builder",
+                                  "portalOperationIconOverride": "https://psuxsouthamerica.azureedge.net/Content/Images/DesignerOperations/aiBuilder.png",
+                                  "portalOperationBrandColorOverride": "#742775",
+                                  "portalOperationApiTierOverride": "Standard"
+                                }
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_commondataserviceforapps",
+                                  "operationId": "aibuilderpredict_textrecognition",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps"
+                                },
+                                "parameters": {
+                                  "item/requestv2/base64Encoded": "@outputs('Get_file_content_Socios_Accionistas')?['body']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Apply_to_each_16": {
+                              "foreach": "@outputs('Recognize_text_PDF_Socios_Accionistas')?['body/responsev2/predictionOutput/results']",
+                              "actions": {
+                                "Apply_to_each_17": {
+                                  "foreach": "@items('Apply_to_each_16')?['lines']",
+                                  "actions": {
+                                    "Append_to_string_variable_2": {
+                                      "runAfter": {},
+                                      "type": "AppendToStringVariable",
+                                      "inputs": {
+                                        "name": "var_texto_PDF",
+                                        "value": "@item()?['text']"
+                                      }
+                                    }
+                                  },
+                                  "runAfter": {},
+                                  "type": "Foreach"
+                                }
+                              },
+                              "runAfter": {
+                                "Recognize_text_PDF_Socios_Accionistas": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Foreach"
+                            },
+                            "HTTP_Socios_Accionistas": {
+                              "runAfter": {
+                                "Apply_to_each_16": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "Http",
+                              "inputs": {
+                                "method": "POST",
+                                "uri": "@variables('URL_Confianza')",
+                                "headers": {
+                                  "ApiKey": "@variables('var_ApiKey')"
+                                },
+                                "body": {
+                                  "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                  "nombre": "@{outputs('Socios_Accionistas')?['body/var_Nombre_Documento']}.pdf",
+                                  "archivo": "@{variables('var_Base64')}",
+                                  "identificacion": "@{triggerBody()?['numero_documento']}",
+                                  "dataKeys": [
+                                    {
+                                      "clave": "null",
+                                      "valor": "null"
+                                    }
+                                  ],
+                                  "tipo": "@{triggerBody()?['sub_flujo']}"
+                                }
+                              }
+                            },
+                            "Set_variable_Respuesta_Socios_Accionistas": {
+                              "runAfter": {
+                                "HTTP_Socios_Accionistas": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "SetVariable",
+                              "inputs": {
+                                "name": "Var_Respuesta",
+                                "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"Ejecutado\", \"Numerode Documento\":\"@{outputs('Socios_Accionistas')?['body/var_Nombre_Documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Socios_Accionistas')['statusCode']}\"}"
+                              }
+                            },
+                            "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_4": {
+                              "runAfter": {
+                                "Set_variable_Respuesta_Socios_Accionistas": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness_1",
+                                  "operationId": "GetFileMetadataByPath",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "path": "/Documentos Fianzas/@{outputs('Socios_Accionistas')?['body/var_Nombre_Documento']}"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            },
+                            "Eliminar_archivo_4": {
+                              "runAfter": {
+                                "Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_4": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "host": {
+                                  "connectionName": "shared_onedriveforbusiness_1",
+                                  "operationId": "DeleteFile",
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_onedriveforbusiness"
+                                },
+                                "parameters": {
+                                  "id": "@outputs('Obtener_metadatos_de_archivo_mediante_ruta_de_acceso_4')?['body/Id']"
+                                },
+                                "authentication": "@parameters('$authentication')"
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Socios_Accionistas": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "HTTP_Socios_Accionistas_Error": {
+                                "runAfter": {},
+                                "type": "Http",
+                                "inputs": {
+                                  "method": "POST",
+                                  "uri": "@variables('URL_Confianza')",
+                                  "headers": {
+                                    "ApiKey": "@variables('var_ApiKey')"
+                                  },
+                                  "body": {
+                                    "idSolicitud": "@{triggerBody()?['id_proceso']}",
+                                    "nombre": "@{outputs('Socios_Accionistas')?['body/var_Nombre_Documento']}",
+                                    "archivo": "",
+                                    "identificacion": "@{triggerBody()?['numero_documento']}",
+                                    "dataKeys": [
+                                      {
+                                        "clave": "null",
+                                        "valor": "null"
+                                      }
+                                    ],
+                                    "tipo": "@{triggerBody()?['sub_flujo']}"
+                                  }
+                                }
+                              },
+                              "Set_variable_respuesta_Socios_Accionistas_Error": {
+                                "runAfter": {
+                                  "HTTP_Socios_Accionistas_Error": [
+                                    "Succeeded"
+                                  ]
+                                },
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "Var_Respuesta",
+                                  "value": "{\"IdProceso\":\"@{triggerBody()?['id_proceso']}\",\"Flujo\":\"@{triggerBody()?['sub_flujo']}\", \"Proceso\":\"No ejecutado numero de docuento no valido\", \"Numerode Documento\":\"@{triggerBody()?['numero_documento']}\",\"Respuesta\":\"OK\",\"Respuesta_API\":\"@{outputs('HTTP_Socios_Accionistas_Error')['statusCode']}\"}"
+                                }
+                              }
+                            }
+                          },
+                          "expression": {
+                            "not": {
+                              "equals": [
+                                "@outputs('Socios_Accionistas')?['body/var_Nombre_Documento']",
+                                "Numero no existe"
+                              ]
+                            }
+                          },
+                          "type": "If"
+                        }
+                      }
+                    }
+                  },
+                  "default": {
+                    "actions": {}
+                  },
+                  "expression": "@triggerBody()?['sub_flujo']",
+                  "type": "Switch"
+                }
+              }
+            }
+          },
+          "default": {
+            "actions": {}
+          },
+          "expression": "@triggerBody()?['tipo_flujo']",
+          "metadata": {
+            "operationMetadataId": "4b8672a1-188c-4058-a117-bf80bae14dab"
+          },
+          "type": "Switch"
+        },
+        "Var_URL": {
+          "runAfter": {
+            "Var_Repuesta": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "080c6ed7-199c-4fcc-a986-a38bd1fe1f33"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "var_Url",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Var_URL_Confianza": {
+          "runAfter": {
+            "Var_URL": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "4e504828-c2b3-475c-ac85-89d821ff7584"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "URL_Confianza",
+                "type": "string",
+                "value": "https://confiapidev.azurewebsites.net/api/Polizas/GuardarArchivo"
+              }
+            ]
+          }
+        },
+        "Var_Base_64": {
+          "runAfter": {
+            "Var_URL_Confianza": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6123c20e-6321-44bf-a886-201b043b54a2"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "var_Base64",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Var_Texto_PDF": {
+          "runAfter": {
+            "Var_Base_64": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "44fbd22f-e8e1-46d6-8146-8d6fc40640df"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "var_texto_PDF",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "var_ApiKey": {
+          "runAfter": {
+            "Var_Texto_PDF": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "e905330f-a97a-4b58-b429-305933c15af2"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "var_ApiKey",
+                "type": "string",
+                "value": "ae37d345-cfb2-4553-acc4-c5f8ffd29fd1"
+              }
+            ]
+          }
+        },
+        "Var_Deuda_Pendiente": {
+          "runAfter": {
+            "var_ApiKey": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "376e65de-857d-41f5-99b8-2bb5d891bd1e"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "var_DeudaPendiente",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Var_Posicion_Caracteres": {
+          "runAfter": {
+            "Var_Deuda_Pendiente": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f879d5a2-416d-425b-9bae-b5b4f79d8ec6"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "var_PosicionCaracteres",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "var_SRI_X": {
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "7f1a93c4-f110-43eb-badd-5b24f584d49f"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "SRIx",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "var_SRI_Y": {
+          "runAfter": {
+            "var_SRI_X": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "894c5b2c-b4c9-443f-a638-ca62598e70c0"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "SRIy",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Tipo_de_Pantalla": {
+          "runAfter": {
+            "var_SC_Y2": [
+              "Succeeded"
+            ]
+          },
+          "cases": {
+            "Pantala_13\"": {
+              "case": 13,
+              "actions": {
+                "Set_variable_SRY_x": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SRIx",
+                    "value": "794"
+                  }
+                },
+                "Set_variable_SRI_y": {
+                  "runAfter": {
+                    "Set_variable_SRY_x": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SRIy",
+                    "value": "598"
+                  }
+                },
+                "Set_variable_SC_x1": {
+                  "runAfter": {
+                    "Set_variable_SRI_y": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCx1",
+                    "value": "552"
+                  }
+                },
+                "Set_variable_SC_x2": {
+                  "runAfter": {
+                    "Set_variable_SC_x1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCx2",
+                    "value": "480"
+                  }
+                },
+                "Set_variable_SC_y1": {
+                  "runAfter": {
+                    "Set_variable_SC_x2": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCy1",
+                    "value": "480"
+                  }
+                },
+                "Set_variable_SC_y2": {
+                  "runAfter": {
+                    "Set_variable_SC_y1": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCy2",
+                    "value": "466"
+                  }
+                }
+              }
+            },
+            "Pantalla_14\"": {
+              "case": 14,
+              "actions": {
+                "Set_variable_SRI_x_14": {
+                  "runAfter": {},
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SRIx",
+                    "value": "700"
+                  }
+                },
+                "Set_variable_SRI_y_14": {
+                  "runAfter": {
+                    "Set_variable_SRI_x_14": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SRIy",
+                    "value": "594"
+                  }
+                },
+                "Set_variable_Sc_x1_14": {
+                  "runAfter": {
+                    "Set_variable_SRI_y_14": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCx1",
+                    "value": "464"
+                  }
+                },
+                "Set_variable_SC_x2_14": {
+                  "runAfter": {
+                    "Set_variable_Sc_x1_14": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCx2",
+                    "value": "681"
+                  }
+                },
+                "Set_variable_SC_y1_14": {
+                  "runAfter": {
+                    "Set_variable_SC_x2_14": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCy1",
+                    "value": "490"
+                  }
+                },
+                "Set_variable_SC_y2_14": {
+                  "runAfter": {
+                    "Set_variable_SC_y1_14": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "SCy2",
+                    "value": "427"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "actions": {}
+          },
+          "expression": "@triggerBody()?['pantalla']",
+          "metadata": {
+            "operationMetadataId": "901ca326-1d5d-4023-9d42-c61f10955960"
+          },
+          "type": "Switch"
+        },
+        "var_SC_X1": {
+          "runAfter": {
+            "var_SRI_Y": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "77412184-f279-475c-8781-d97ae2af314d"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "SCx1",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "var_SC_X2": {
+          "runAfter": {
+            "var_SC_X1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "81381d87-e4dd-42cb-b97f-cd3cf02720b7"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "SCx2",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "var_SC_Y1": {
+          "runAfter": {
+            "var_SC_X2": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "f6a25fc0-553e-41c3-8d21-45d6178a868a"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "SCy1",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "var_SC_Y2": {
+          "runAfter": {
+            "var_SC_Y1": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7c9a6f08-0238-4b00-ab59-5954ea43be82"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "SCy2",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "schemaVersion": "1.0.0.0"
+}
