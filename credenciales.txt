@@ -1,0 +1,77 @@
+1706551171 cedula con inconvenientes  fecha de nacimiento: 14/06/1969
+
+1792024951001 Ruc con inconvenientes
+
+Conexion VPN:
+IP: 190.57.135.42
+User: soporte.akros
+Pass: Confianza2021*
+tipo: IpSec
+ 
+Información Sevidor/PC:
+ip: 10.1.0.30
+nombre: rpafianzas
+ 
+Credenciales Windows:
+usuario: CONFIANZA\usr_servicios_rpa
+user: usr_servicios_rpa@confianza.com.ec
+pass: Confianza2021*
+
+
+
+
+user_rpa@confianza.com.ec
+El nuevo usuario es user_rpa, contraseña: Confianza2021*
+
+La ip de la nueva máquina virtual es 10.1.0.31
+
+Ya consta como administrador de la vm el usuario user_rpa y también tiene asignadas las licencias indicadas.
+
+
+Variables
+
+In
+var_Nombre_Proceso
+var_NumeroDocumento
+var_Urlre
+var_id_Proceso
+
+
+OUt
+Respuesta_consulta
+var_Nombre_Documento
+
+
+VPN
+
+servidor: 190.57.135.42
+clave pre: Sistemas*
+usuario: soporte_akros
+contraseña: Akros2021*
+
+Equipo correccion flujo
+
+
+usuario: soporte.akros
+pass: Confianza2021*
+
+
+GATEWAY 2
+
+PRA2_SEGCONFIANZA
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+ 
